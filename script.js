@@ -2,6 +2,7 @@ const input = document.getElementById("input-box");
 const productscontainer = document.getElementById("products-container");
 const category = document.getElementById("category-filter");
 const cartContainer = document.getElementById("cart-container");
+const cartTotalDiv = document.getElementById("cart-total");
 
 let url = "https://fakestoreapi.com/products";
 
@@ -14,7 +15,7 @@ async function getData(){
 
     const response = await fetch(url);
     const data = await response.json();
-    allProducts = data
+    allProducts = data;
     console.log(data);
     
     if(!response.ok){
@@ -63,7 +64,6 @@ const productsDisplayHandler = (allProducts)=>{
 
 const addToCart = (item) =>{
     cart.push(item)
-    console.log(cart)
     renderCart()
 }
 
@@ -76,7 +76,6 @@ const renderCart = () =>{
         cart.forEach((item)=>{
             const cartDiv = document.createElement("div");
             
-
             const img = document.createElement("img");
             img.src = item.image;
 
@@ -87,7 +86,7 @@ const renderCart = () =>{
             price.textContent = `Price: $${item.price}`;
 
             const button = document.createElement("button")
-            button.textContent = "Remove item"
+            button.textContent = "Remove item";
 
             
             cartDiv.appendChild(img);
@@ -95,18 +94,25 @@ const renderCart = () =>{
             cartDiv.appendChild(price);
             cartDiv.appendChild(button);
 
-            button.addEventListener("click", ()=>removeitem(item));
+            button.addEventListener("click", ()=> removeitem(item));
 
 
             cartContainer.appendChild(cartDiv);
         })
 
+        let total = cartPriceCalculator();
+        cartTotalDiv.textContent = `Total amount ${total}`
         
     }
 }
 
+const removeitem = (itemToRemove) =>{
+    cart = cart.filter((currentElement) => {
+        return currentElement.id !== itemToRemove.id;
+    });
 
-
+    renderCart();
+}
 
 const categoryDisplayHandler = () => {
    const categories = ["all", ...new Set((allProducts.map(item => item.category)))]
@@ -129,7 +135,6 @@ const masterFilter = () =>{
     const selectedCategory = category.value;
 
     const filterProduct = allProducts.filter((item)=>{
-        console.log(item);
         
         const matchesSearch = item.title.toLowerCase().includes(searchTerm);
 
@@ -141,6 +146,14 @@ const masterFilter = () =>{
     productsDisplayHandler(filterProduct);
 
 }
+
+const cartPriceCalculator = () =>{
+    const total = cart.reduce((curr , item)=>{
+        return curr + item.price;
+    },0);
+    return total;
+}
+
 
 input.addEventListener("keyup", masterFilter);
 category.addEventListener("change", masterFilter);
